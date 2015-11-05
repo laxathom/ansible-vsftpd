@@ -29,10 +29,10 @@
   when: auth_pwdfile and ansible_pkg_mgr == "apt"
 
 - name: create directory for user configuration
-  command: mkdir {{ vsftpd_user_config_dir }} creates={{ vsftpd_user_config_dir }}
+  command: mkdir -p {{ vsftpd_user_config_dir }} creates={{ vsftpd_user_config_dir }}
 
 - name: create directory for key local_root from vsftpd.conf
-  command: mkdir {{ vsftpd_local_root }} creates={{ vsftpd_local_root }}
+  command: mkdir -p {{ vsftpd_local_root }} creates={{ vsftpd_local_root }}
 
 - name: set permissions for local_root
   command: chown root:root {{ vsftpd_local_root }}
