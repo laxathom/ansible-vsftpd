@@ -1,7 +1,22 @@
-# PAM
-auth		requisite	pam_listfile.so		item=user sense=deny file=/etc/ftpusers onerr=fail
-auth		requisite	pam_pwdfile.so		pwdfile={{ pwd_file }}
-auth		requisite	pam_nologin.so
-account		requisite	pam_permit.so
-session		requisite	pam_loginuid.so
-password	required	pam_deny.so
+#%PAM-1.0
+{% if auth_local_user | default(True) %}
+auth        sufficient  pam_unix.so
+account     sufficient  pam_unix.so
+{% endif %}
+
+session    optional     pam_keyinit.so      force revoke
+auth       required     pam_listfile.so     item=user sense=deny file={{ vsftpd_users_blacklist | default('/etc/vsftpd/ftpusers') }} onerr=succeed
+
+{% if auth_berkeley_db | default(True) %}
+auth       required     pam_userdb.so       db={{ vsftpd_pw_file }}
+account    required     pam_userdb.so       db={{ vsftpd_pw_file }}
+{% endif %}
+
+{% if auth_pwdfile | default(False) %}
+auth       requisite    pam_pwdfile.so      pwdfile={{ vsftpd_pw_file }}
+{% endif %}
+
+{% if auth_mysql | default(False) %}
+auth required           pam_mysql.so        verbose=0 user={{ vsftpd_mysql_user | mandatory }} passwd={{ vsftpd_mysql_pass | mandatory }} host={{ vsftpd_mysql_host | mandatory }} db=vsftpd table=users usercolumn=login passwdcolumn=password crypt=3 where=users.active=1 sqllog=yes logtable=log logmsgcolumn=message logusercolumn=login logpidcolumn=pid loghostcolumn=host logtimecolumn=time
+account required        pam_mysql.so        verbose=0 user={{ vsftpd_mysql_user | mandatory }} passwd={{ vsftpd_mysql_pass | mandatory }} host={{ vsftpd_mysql_host | mandatory }} db=vsftpd table=users usercolumn=login passwdcolumn=password crypt=3 where=users.active=1 sqllog=yes logtable=log logmsgcolumn=message logusercolumn=login logpidcolumn=pid loghostcolumn=host logtimecolumn=time
+{% endif %}

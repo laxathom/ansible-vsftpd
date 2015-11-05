@@ -1,0 +1,5 @@
+local_root={{ vsftpd_local_root }}/{{ item.key }}
+write_enable={{ item.value.write_enable }}
+anon_upload_enable={{ item.value.anon_upload_enable }}
+anon_mkdir_write_enable={{ item.value.anon_mkdir_write_enable }}
+anon_other_write_enable={{ item.value.anon_other_write_enable }}

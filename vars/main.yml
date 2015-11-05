@@ -9,10 +9,12 @@ vsftpd_xferlog_enable: 'YES'
 vsftpd_local_root: /srv/ftp
 vsftpd_ssl_enable: 'YES'
 vsftpd_tls_only: 'YES'
-vsftpd_user_config_dir: /etc/vsftpd.d
 # end vsftpd settings
 
+auth_pwdfile: False
 pwd_file: /etc/vsftpd
+users_pw: /root/.ftp-users
+vsftpd_users_blacklist: /etc/vsftpd/user_list
 
 test_user_is_enable: no
 test_user: k0st1an

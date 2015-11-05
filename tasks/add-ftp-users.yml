@@ -1,0 +1,33 @@
+- name: Create user dirs
+  file: path={{ vsftpd_local_root }}/{{ item.key }} state=directory owner=ftp group=ftp mode=755
+  with_dict: "{{ virtual_users }}"
+  tags:
+    - ftp
+    - homedir
+
+- name: Add user acls
+  template: src="vsftpd-user.conf.j2" dest={{ vsftpd_user_config_dir }}/{{ item.key }} mode=644 backup=yes
+  with_dict: "{{ virtual_users }}"
+  tags:
+    - ftp
+    - acls
+
+- name: Create credential file
+  command: /bin/touch {{ users_pw }}
+  when: auth_berkeley_db
+
+- name: Create the credential file
+  lineinfile: dest={{ users_pw }} mode=600 line="{{ item.key}}\n{{ item.value.password }}" state=present
+  with_dict: "{{ virtual_users }}"
+  when: auth_berkeley_db
+
+- name: Generate pw file
+  command: db_load -T -t hash -f {{ users_pw }} {{ vsftpd_pw_file }}.db
+  when: auth_berkeley_db
+  tags:
+    - ftp
+    - auth
+    - db
+
+- name: Remove crendential file once done
+  file: path={{ users_pw }} state=absent

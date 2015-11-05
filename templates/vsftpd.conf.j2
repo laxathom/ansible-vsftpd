@@ -1,4 +1,5 @@
 ftpd_banner={{ vsftpd_ftpd_banner }}
+
 listen=YES
 anonymous_enable=NO
 xferlog_enable={{ vsftpd_xferlog_enable }}
@@ -7,15 +8,21 @@ connect_from_port_20=YES
 hide_ids=YES
 delete_failed_uploads=YES
 local_enable=YES
-user_config_dir={{ vsftpd_user_config_dir }}
+
+pam_service_name=vsftpd
+anonymous_enable=NO
+user_config_dir={{ vsftpd_user_config_dir | default('/etc/vsftpd/vsftpd_user_conf') }}
+
 virtual_use_local_privs=YES
 write_enable=YES
 guest_enable=YES
 chroot_local_user=YES
 allow_writeable_chroot=YES
 user_sub_token=$USER
-local_root={{ vsftpd_local_root }}/$USER
-max_per_ip={{ vsftpd_max_per_ip }}
+local_root={{ vsftpd_local_root | default('/var/lib/vsftpd') }}/$USER
+max_per_ip={{ vsftpd_max_per_ip | default(10) }}
+
+pasv_enable=YES
 pasv_min_port={{ vsftpd_pasv_min_port }}
 pasv_max_port={{ vsftpd_pasv_max_port }}
 force_local_data_ssl={{ vsftpd_tls_only }}
