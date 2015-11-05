@@ -4,7 +4,29 @@
   apt: name={{ item }} state=latest cache_valid_time=3600 update_cache=yes
   with_items:
     - vsftpd
-    - libpam-pwdfile
+  when: ansible_pkg_mgr == "apt"
+
+- name: install vsftpd
+  yum: name={{ item }} state=latest
+  when: ansible_pkg_mgr == "yum"
+  with_items:
+    - vsftpd
+
+- name: install db4 utils
+  yum: name=db4-utils state=latest
+  when: auth_berkeley_db and ansible_pkg_mgr == "yum"
+
+- name: install db4 util
+  apt: name=db4.8-util state=latest
+  when: auth_berkeley_db and ansible_pkg_mgr == "apt"
+
+- name: install libpam-pwdfile
+  yum: name=libpam-pwdfile state=latest
+  when: auth_pwdfile and ansible_pkg_mgr == "yum"
+
+- name: install libpam-pwdfile
+  apt: name=libpam-pwdfile state=latest cache_valid_time=3600 update_cache=yes
+  when: auth_pwdfile and ansible_pkg_mgr == "apt"
 
 - name: create directory for user configuration
   command: mkdir {{ vsftpd_user_config_dir }} creates={{ vsftpd_user_config_dir }}
