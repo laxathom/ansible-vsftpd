@@ -1,12 +1,9 @@
 ftpd_banner={{ vsftpd_ftpd_banner }}
 
 listen=YES
-anonymous_enable=NO
-xferlog_enable={{ vsftpd_xferlog_enable }}
 use_localtime=YES
 connect_from_port_20=YES
 hide_ids=YES
-delete_failed_uploads=YES
 local_enable=YES
 
 pam_service_name=vsftpd
@@ -17,7 +14,14 @@ virtual_use_local_privs=YES
 write_enable=YES
 guest_enable=YES
 chroot_local_user=YES
+
+{% if allow_writeable_chroot | default(False) %}
 allow_writeable_chroot=YES
+{% endif %}
+{% if delete_failed_upload | default(False) %}
+delete_failed_uploads=YES
+{% endif %}
+
 user_sub_token=$USER
 local_root={{ vsftpd_local_root | default('/var/lib/vsftpd') }}/$USER
 max_per_ip={{ vsftpd_max_per_ip | default(10) }}
@@ -25,8 +29,25 @@ max_per_ip={{ vsftpd_max_per_ip | default(10) }}
 pasv_enable=YES
 pasv_min_port={{ vsftpd_pasv_min_port }}
 pasv_max_port={{ vsftpd_pasv_max_port }}
-force_local_data_ssl={{ vsftpd_tls_only }}
-force_local_logins_ssl={{ vsftpd_tls_only }}
-rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
-ssl_enable={{ vsftpd_ssl_enable }}
+
+{% if enable_ssl | default(False) %}
+rsa_cert_file={{ vsftp_ssl_certificate | mandatory }}
+rsa_private_key_file={{ vsftp_ssl_private_key | mandatory }}
+ssl_enable=YES
+allow_anon_ssl=NO
+force_local_data_ssl=YES
+force_local_logins_ssl=YES
+require_ssl_reuse=NO
+ssl_ciphers=HIGH
+ssl_tlsv1=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+{% endif %}
+
+{% if enable_log | default(True) %}
+# Log
+dual_log_enable=YES
+xferlog_enable=YES
+xferlog_std_format=YES
+vsftpd_log_file={{ vsftpd_logfile | default('/var/log/vsftpd.log') }}
+{% endif %}
